@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Père Noël Secret — ULTRA KITSCH Edition</title>
+<style>
+  :root{
+    --neon-pink:#ff00ff; --neon-green:#00ff66; --neon-yellow:#ffff00; --neon-cyan:#00ffff; --neon-red:#ff0033; --gold:#ffd700;
+  }
+  html,body{height:100%;margin:0;font-family: 'Comic Sans MS', 'Comic Sans', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;}
+  body{
+    background: radial-gradient(circle at 20% 20%, var(--neon-pink), transparent 40%),
+                radial-gradient(circle at 80% 30%, var(--neon-green), transparent 45%),
+                radial-gradient(circle at 30% 80%, var(--neon-cyan), transparent 45%),
+                linear-gradient(135deg, #18001f 0%, #001a1f 100%);
+    color:white; overflow-x:hidden; position:relative;
+  }
+  /* Snow */
+  .snow{position:fixed; inset:0; pointer-events:none; z-index:1;}
+  .flake{position:absolute; top:-2vh; font-size:clamp(14px, 2.2vw, 28px); opacity:.9; animation:fall linear infinite; filter:drop-shadow(0 0 6px white)}
+  @keyframes fall{ to { transform: translateY(110vh) rotate(360deg); opacity:.95;} }
+
+  /* Header garlands */
+  header{ text-align:center; padding:24px 12px 12px; position:relative; z-index:2; }
+  .title{ font-size: clamp(28px, 5vw, 64px); text-shadow: 0 0 8px var(--neon-yellow), 0 0 16px var(--neon-pink), 0 0 24px var(--neon-green); letter-spacing:2px; }
+  .subtitle{ margin-top:6px; font-size:clamp(14px, 2.2vw, 20px); color:#fffdd0; text-shadow:0 0 6px #ff6; }
+
+  .garland{ display:flex; justify-content:center; gap:10px; margin:12px 0 4px; font-size:clamp(18px,3vw,30px); }
+  .garland span{ animation:bounce 1.6s infinite ease-in-out; display:inline-block; }
+  .garland span:nth-child(odd){ filter: drop-shadow(0 0 8px var(--neon-green)); }
+  .garland span:nth-child(even){ filter: drop-shadow(0 0 8px var(--neon-pink)); }
+  @keyframes bounce{ 0%,100%{ transform:translateY(0)} 50%{ transform:translateY(-8px)} }
+
+  /* Main card */
+  .card{ position:relative; z-index:2; margin: 16px auto; max-width: 980px; background: rgba(255,255,255,0.08);
+         border: 3px dashed var(--gold); border-radius: 24px; padding: 18px; box-shadow: 0 0 24px rgba(255,215,0,.5), inset 0 0 24px rgba(0,255,153,.25);}
+
+  /* Button grid */
+  .grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:14px; }
+  .nameBtn{ position:relative; cursor:pointer; border:none; padding:16px 14px; border-radius:18px; font-weight:800; font-size:20px; text-transform:uppercase; letter-spacing:1px;
+            box-shadow: 0 0 16px rgba(255,255,255,.55), inset 0 0 10px rgba(0,0,0,.25);
+            background: linear-gradient(135deg, rgba(255,0,255,.85), rgba(0,255,153,.85));
+            color:#001; text-shadow: 0 2px 0 rgba(255,255,255,.5);
+            transition: transform .08s ease, filter .2s ease; }
+  .nameBtn:hover{ transform: translateY(-2px) scale(1.02); filter: brightness(1.15) saturate(1.4); }
+  .nameBtn[disabled]{ opacity:.5; filter:grayscale(.2); cursor:not-allowed; }
+  .nameBtn .emoji{ position:absolute; right:8px; bottom:6px; font-size:24px; }
+
+  .legend{ margin-top:8px; font-size:14px; color:#ffe; text-align:center; opacity:.9 }
+
+  /* Modal */
+  .modal{ position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; z-index:999; }
+  .modal.open{ display:flex; }
+  .dialog{ background: linear-gradient(180deg, #fffbe6, #ffe9ff); color:#4a003a; border:6px ridge var(--gold); border-radius:24px; padding:24px; width:min(92vw,560px);
+           box-shadow:0 0 40px rgba(255,0,255,.6), inset 0 0 18px rgba(255,255,255,.9); text-align:center; }
+  .dialog h2{ margin:0 0 8px; font-size:32px; text-shadow:0 0 6px #fff, 0 0 14px var(--neon-pink); }
+  .dialog p{ margin:0 0 12px; font-weight:700; font-size:22px; }
+  .closeBtn{ margin-top:8px; border:0; background: linear-gradient(135deg, var(--neon-yellow), var(--neon-green)); padding:10px 16px; font-weight:900; border-radius:14px; box-shadow:0 0 12px #fff; cursor:pointer; }
+
+  /* Footer */
+  footer{ text-align:center; margin:18px 0 28px; color:#fffb; font-size:13px; }
+
+  /* Reindeers & elves decorations */
+  .runner{ position:fixed; left:-20vw; top:10vh; font-size: clamp(32px, 8vw, 80px); z-index:3; animation:ride 12s linear infinite; filter: drop-shadow(0 0 8px #fff);}
+  @keyframes ride{ from{ transform:translateX(-20vw) rotate(-5deg);} to{ transform:translateX(120vw) rotate(5deg);} }
+  .elf{ position:fixed; bottom:3vh; left:3vw; font-size: clamp(28px, 6vw, 72px); animation:dance 2.2s ease-in-out infinite; z-index:2;}
+  .elf2{ left:auto; right:4vw; animation-duration:1.6s; }
+  @keyframes dance{ 0%,100%{ transform:translateY(0) rotate(-6deg);} 50%{ transform:translateY(-10px) rotate(6deg);} }
+
+  /* Confetti */
+  .confetti{position:fixed; inset:0; pointer-events:none; z-index:1000}
+  .confetti span{position:absolute; width:10px; height:14px; background:var(--gold); transform:rotate(20deg); animation:pop 1200ms ease-out forwards;}
+  @keyframes pop{ to{ transform: translateY(100vh) rotate(360deg); opacity:0; } }
+
+  .controls{ display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin: 12px 0 0; }
+  .small{ font-size:12px; opacity:.9 }
+</style>
+</head>
+<body>
+  <!-- Moving reindeer sleigh & dancing elves -->
+  <div class="runner">🦌🦌🛷🎅</div>
+  <div class="elf">🧝‍♂️✨</div>
+  <div class="elf elf2">🧝‍♀️✨</div>
+
+  <!-- Snow layer -->
+  <div class="snow" id="snow"></div>
+  <div class="confetti" id="confetti"></div>
+
+  <header>
+    <div class="garland" aria-hidden="true">
+      <span>🟢</span><span>🔴</span><span>🟡</span><span>🟣</span><span>🔵</span><span>🟠</span>
+    </div>
+    <div class="title">PÈRE NOËL SECRET — BOISSE FAMILY 🎄✨</div>
+    <div class="subtitle">Cliquez sur votre prénom pour découvrir qui vous allez gâter — couples exclus automatiquement.</div>
+    <div class="garland" aria-hidden="true">
+      <span>🎀</span><span>🍬</span><span>🍭</span><span>🎁</span><span>🍪</span><span>🧦</span>
+    </div>
+  </header>
+
+  <main class="card">
+    <div class="grid" id="grid"></div>
+    <div class="controls">
+      <button id="regen" class="nameBtn" style="font-size:16px">🔁 Re-mélanger (avant distribution)</button>
+      <button id="revealAll" class="nameBtn" style="font-size:16px;background:linear-gradient(135deg,#ff0000,#ffff00)">👀 Afficher tous les tirages (démo)</button>
+    </div>
+    <p class="legend small">Astuce : utilisez « Re-mélanger » une seule fois avant de partager la page. Ensuite, laissez chaque personne cliquer son bouton.</p>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="dialog">
+      <h2 id="modalTitle">Ho ho ho ! 🎅</h2>
+      <p id="resultText">Vous gâtez : <strong>???</strong></p>
+      <button class="closeBtn" id="closeBtn">J'ai compris ✅</button>
+    </div>
+  </div>
+
+  <footer>
+    Made with 💖 paillettes, rennes et lutins — tout est local, aucune inscription.
+  </footer>
+
+<script>
+(function(){
+  // ==== DATA ====
+  const NAMES = [
+    "PA","Maelle","Antoine","Philippine","Mayeul","Alexis","Gaëtane","Jo","Hugues","HM","Sixte","Baudouin"
+  ];
+  // Couples: mutual exclusion
+  const COUPLES = [
+    ["PA","Maelle"],
+    ["Antoine","Philippine"],
+    ["Alexis","Gaëtane"],
+  ];
+
+  // Build exclusion map (giver -> Set of forbidden giftees)
+  const EXC = Object.fromEntries(NAMES.map(n=>[n,new Set()]));
+  for(const [a,b] of COUPLES){ EXC[a].add(b); EXC[b].add(a); }
+
+  // ==== HELPERS ====
+  const $ = (sel)=>document.querySelector(sel);
+  const grid = $('#grid');
+  const modal = $('#modal');
+  const resultText = $('#resultText');
+  const closeBtn = $('#closeBtn');
+  const confetti = $('#confetti');
+
+  // Create snow
+  const snowLayer = document.getElementById('snow');
+  const snowflakes = 80;
+  for(let i=0;i<snowflakes;i++){
+    const s = document.createElement('div');
+    s.className='flake';
+    s.textContent = Math.random() < .7 ? '❄️' : (Math.random()<.5 ? '✳️' : '❅');
+    s.style.left = Math.random()*100 + 'vw';
+    s.style.animationDuration = (6 + Math.random()*10) + 's';
+    s.style.animationDelay = (Math.random()*-10) + 's';
+    snowLayer.appendChild(s);
+  }
+
+  // Confetti burst
+  function confettiBurst(x=window.innerWidth/2){
+    for(let i=0;i<120;i++){
+      const p=document.createElement('span');
+      p.style.left=(x + (Math.random()*200-100))+'px';
+      p.style.top='-10px';
+      p.style.background = `hsl(${Math.random()*360},100%,60%)`;
+      p.style.animationDuration = (800+Math.random()*900)+'ms';
+      p.style.transform = `translateY(0) rotate(${Math.random()*180}deg)`;
+      confetti.appendChild(p);
+      setTimeout(()=>p.remove(), 1800);
+    }
+  }
+
+  // Derangement with exclusions (simple backtracking)
+  function assign(names){
+    const n = names.length;
+    const used = Array(n).fill(false);
+    const res = Array(n).fill(-1);
+    const indices = [...Array(n).keys()];
+
+    function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } }
+
+    function canGive(giverIdx, gifteeIdx){
+      const giver = names[giverIdx];
+      const giftee = names[gifteeIdx];
+      if(giverIdx===gifteeIdx) return false; // no self
+      if(EXC[giver] && EXC[giver].has(giftee)) return false; // couple exclusion
+      return true;
+    }
+
+    // Try randomized order for better chance
+    const order = [...indices];
+    shuffle(order);
+
+    function backtrack(pos){
+      if(pos===n) return true;
+      const giverIdx = order[pos];
+      const choices = [...indices];
+      shuffle(choices);
+      for(const j of choices){
+        if(!used[j] && canGive(giverIdx,j)){
+          res[giverIdx]=j; used[j]=true;
+          if(backtrack(pos+1)) return true;
+          used[j]=false; res[giverIdx]=-1;
+        }
+      }
+      return false;
+    }
+
+    if(backtrack(0)){
+      const map = {};
+      for(let i=0;i<n;i++) map[names[i]] = names[res[i]];
+      return map;
+    }
+    return null;
+  }
+
+  // Keep a single assignment for the session
+  let ASSIGN = null;
+  function regenerate(){
+    for(let tries=0; tries<200; tries++){
+      const attempt = assign(NAMES);
+      if(attempt){ ASSIGN = attempt; return true; }
+    }
+    return false;
+  }
+
+  // Build UI
+  function build(){
+    grid.innerHTML='';
+    NAMES.forEach((name, idx)=>{
+      const btn = document.createElement('button');
+      btn.className='nameBtn';
+      btn.id = 'btn_'+idx;
+      btn.innerHTML = `<span class="label">${name}</span> <span class="emoji">${randomEmoji()}</span>`;
+      btn.addEventListener('click', (e)=> onReveal(name, btn, e));
+      grid.appendChild(btn);
+    });
+  }
+
+  function randomEmoji(){
+    const arr = ['🎁','🎄','🦌','🧝‍♂️','🧝‍♀️','✨','🍬','🍭','🧦','🔔','❄️','⛄'];
+    return arr[Math.floor(Math.random()*arr.length)];
+  }
+
+  function onReveal(giver, btn, e){
+    if(!ASSIGN){ if(!regenerate()) { alert('Impossible de générer un tirage valide. Réessayez.'); return; } }
+    const target = ASSIGN[giver];
+    if(!target){ alert('Erreur de tirage.'); return; }
+    // Show modal
+    resultText.innerHTML = `Vous gâtez : <strong style="font-size:28px;color:#b0005a">${target}</strong> 🎁`;
+    modal.classList.add('open');
+    // disable button after reveal
+    btn.disabled = true; btn.style.filter='saturate(1.4) brightness(1.2)';
+    confettiBurst((e && e.clientX) || undefined);
+  }
+
+  // Close modal
+  closeBtn.addEventListener('click', ()=> modal.classList.remove('open'));
+  modal.addEventListener('click', (ev)=>{ if(ev.target===modal) modal.classList.remove('open'); });
+
+  // Controls
+  document.getElementById('regen').addEventListener('click', ()=>{
+    if(confirm('Re-mélanger maintenant va réinitialiser tous les boutons. Continuer ?')){
+      if(regenerate()){
+        // reset buttons
+        [...grid.querySelectorAll('.nameBtn')].forEach(b=>{ b.disabled=false; });
+        confettiBurst();
+      } else {
+        alert('Aucun tirage valide trouvé. Réessayez.');
+      }
+    }
+  });
+  document.getElementById('revealAll').addEventListener('click', ()=>{
+    if(!ASSIGN){ if(!regenerate()){ alert('Aucun tirage valide.'); return; } }
+    alert(Object.entries(ASSIGN).map(([g,t])=>`${g} → ${t}`).join('\n'));
+  });
+
+  // Init
+  build();
+  regenerate();
+})();
+</script>
+</body>
+</html>
