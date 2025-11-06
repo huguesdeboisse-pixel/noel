@@ -26,26 +26,132 @@
 <body>
 <div class="frame"></div>
 <h1>ЖОYEUX НOËL</h1>
-<img src="b6127f72-7660-40b4-966b-d417f5e93deb.png" class="decor left-decor" alt="Vierge et enfant">
-<img src="12566d28-2fe4-49be-98c9-92787e8dca76.png" class="decor tree" alt="Sapin">
-<img src="dc05b10f-fb2c-4140-a923-d0c98961cee1.png" class="angel" id="angel" alt="Ange doré">
+
+<!-- Vos images locales -->
+<img src="img/holy-card.jpg" class="decor left-decor" alt="Sainte Famille">
+<img src="img/tree.jpg" class="decor tree" alt="Sapin de Noël">
+<img src="img/angel.jpg" class="angel" id="angel" alt="Ange doré">
+
+<!-- Grille des prénoms -->
 <div class="grid" id="grid"></div>
+
+<!-- Carte rouge avec le tirage -->
 <div class="card-result" id="cardResult"></div>
+
 <script>
 (function(){
   const NAMES=["PA","Maelle","Antoine","Philippine","Mayeul","Alexis","Gaëtane","Jo","Hugues","HM","Sixte","Baudouin"];
   const COUPLES=[["PA","Maelle"],["Antoine","Philippine"],["Alexis","Gaëtane"]];
   const EXC=Object.fromEntries(NAMES.map(n=>[n,new Set()]));
-  for(const [a,b] of COUPLES){EXC[a].add(b);EXC[b].add(a);}  
-  const LS_ASSIGN='pns_assignment';const LS_REVEALS='pns_reveals';
+  for(const [a,b] of COUPLES){EXC[a].add(b);EXC[b].add(a);}
+
+  const LS_ASSIGN='pns_assignment';
+  const LS_REVEALS='pns_reveals';
   const $=s=>document.querySelector(s);
   const grid=$('#grid');
   const card=$('#cardResult');
   const angel=$('#angel');
+
+  // Fonctions locales
   function load(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch{return null;}}
   function save(k,v){localStorage.setItem(k,JSON.stringify(v));}
-  function derange(names){const n=names.length;const used=Array(n).fill(false);const res=Array(n).fill(-1);const idx=[...Array(n).keys()];function ok(i,j){if(i===j)return false;const g=names[i],t=names[j];if(EXC[g]&&EXC[g].has(t))return false;return true;}function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}}shuffle(idx);function backtrack(p){if(p===n)return true;const i=idx[p];const choices=[...Array(n).keys()];shuffle(choices);for(const j of choices){if(!used[j]&&ok(i,j)){res[i]=j;used[j]=true;if(backtrack(p+1))return true;used[j]=false;res[i]=-1;}}return false;}if(backtrack(0)){const map={};for(let i=0;i<n;i++)map[names[i]]=names[res[i]];return map;}return null;}
-  let ASSIGN=load(LS_ASSIGN);if(!ASSIGN){for(let t=0;t<400;t++){const a=derange(NAMES);if(a){ASSIGN=a;break;}}if(ASSIGN)save(LS_ASSIGN,ASSIGN);}
-  function build(){const reveals=load(LS_REVEALS)||{};grid.innerHTML='';NAMES.forEach((name,i)=>{const b=document.createElement('button');b.className='nameBtn';b.textContent=name;b.addEventListener('click',()=>{reveal(name,b);});if(reveals[name])b.disabled=true;grid.appendChild(b);});showCard();}
-  function reveal(giver,btn){const reveals=load(LS_REVEALS)||{};const t=ASSIGN[giver];if(!t)return;btn.disabled=true;reveals[giver]=t;save(LS_REVEALS,reveals);showCard();}
-  function showCard(){const reveals=load(LS_REVEALS)||{};const keys=Object.keys(reveals);if(keys.length===0){card.style.display='none';angel.style.display='none';return;}const g=keys[0];card.textContent=`${
+
+  // Tirage sans auto-couple
+  function derange(names){
+    const n=names.length;
+    const used=Array(n).fill(false);
+    const res=Array(n).fill(-1);
+    const idx=[...Array(n).keys()];
+    function ok(i,j){
+      if(i===j)return false;
+      const g=names[i],t=names[j];
+      if(EXC[g]&&EXC[g].has(t))return false;
+      return true;
+    }
+    function shuffle(a){
+      for(let i=a.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [a[i],a[j]]=[a[j],a[i]];
+      }
+    }
+    shuffle(idx);
+    function backtrack(p){
+      if(p===n)return true;
+      const i=idx[p];
+      const choices=[...Array(n).keys()];
+      shuffle(choices);
+      for(const j of choices){
+        if(!used[j]&&ok(i,j)){
+          res[i]=j;
+          used[j]=true;
+          if(backtrack(p+1))return true;
+          used[j]=false;
+          res[i]=-1;
+        }
+      }
+      return false;
+    }
+    if(backtrack(0)){
+      const map={};
+      for(let i=0;i<n;i++) map[names[i]]=names[res[i]];
+      return map;
+    }
+    return null;
+  }
+
+  // Récupération ou génération d’un tirage global unique
+  let ASSIGN=load(LS_ASSIGN);
+  if(!ASSIGN){
+    for(let t=0;t<400;t++){
+      const a=derange(NAMES);
+      if(a){ASSIGN=a;break;}
+    }
+    if(ASSIGN) save(LS_ASSIGN,ASSIGN);
+  }
+
+  // Construction des boutons
+  function build(){
+    const reveals=load(LS_REVEALS)||{};
+    grid.innerHTML='';
+    NAMES.forEach(name=>{
+      const b=document.createElement('button');
+      b.className='nameBtn';
+      b.textContent=name;
+      b.addEventListener('click',()=>reveal(name,b));
+      if(reveals[name]) b.disabled=true;
+      grid.appendChild(b);
+    });
+    showCard();
+  }
+
+  // Tirage pour un utilisateur
+  function reveal(giver,btn){
+    const reveals=load(LS_REVEALS)||{};
+    const t=ASSIGN[giver];
+    if(!t)return;
+    btn.disabled=true;
+    reveals[giver]=t;
+    save(LS_REVEALS,reveals);
+    showCard();
+  }
+
+  // Affichage de la carte rouge et de l’ange
+  function showCard(){
+    const reveals=load(LS_REVEALS)||{};
+    const keys=Object.keys(reveals);
+    if(keys.length===0){
+      card.style.display='none';
+      angel.style.display='none';
+      return;
+    }
+    const g=keys[0];
+    card.textContent=`${g} → ${reveals[g]}`;
+    card.style.display='block';
+    angel.style.display='block';
+  }
+
+  build();
+})();
+</script>
+</body>
+</html>
